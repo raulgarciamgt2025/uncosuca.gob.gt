@@ -52,11 +52,11 @@ class Table extends DataTableComponent
 
     public function builder(): Builder
     {
-        return Pay::with('company');
+        return Pay::select('pays.*')->with('company');
     }
     public function excel(): BinaryFileResponse
     {
-        $pays = $this->baseQuery()->pluck('id')->toArray();
+        $pays = $this->baseQuery()->pluck('pays.id')->toArray();
         return Excel::download(new PaysExport($pays, $this->mounts), 'pagos.xlsx');
     }
 
@@ -126,7 +126,7 @@ class Table extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Número', 'id')
+            Column::make('Número', 'pays.id')
                 ->sortable(),
             Column::make('Empresa', 'company.mercantile_name')
                 ->sortable()
@@ -198,7 +198,7 @@ class Table extends DataTableComponent
                 ->html()
                 ->sortable()
                 ->searchable(),
-            Column::make('Acciones', "id")
+            Column::make('Acciones', "pays.id")
                 ->format(function ($pay_id, $row) {
                     $status = $row->status;
                     return view('components.admin-pay-actions', compact('pay_id', 'status', 'row'));

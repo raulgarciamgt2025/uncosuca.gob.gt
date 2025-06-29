@@ -63,12 +63,13 @@ class Table extends DataTableComponent
             return Pay::where('id', 0); // This will return no results
         }
         
-        return Pay::with('company')
+        return Pay::select('pays.*')
+            ->with('company')
             ->whereIn('company_id', $assignedCompanyIds);
     }
     public function excel(): BinaryFileResponse
     {
-        $pays = $this->baseQuery()->pluck('id')->toArray();
+        $pays = $this->baseQuery()->pluck('pays.id')->toArray();
         return Excel::download(new PaysExport($pays, $this->mounts), 'pagos.xlsx');
     }
 
@@ -118,7 +119,7 @@ class Table extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Número', 'id')
+            Column::make('Número', 'pays.id')
                 ->sortable()
                 ->searchable(),
             Column::make('Empresa', 'company.mercantile_name')
