@@ -52,7 +52,11 @@ class Table extends DataTableComponent
 
     public function builder(): Builder
     {
-        return Pay::select('pays.*')->with('company');
+        return Pay::query()
+            ->select('pays.*')
+            ->with(['company' => function($query) {
+                $query->select('id', 'mercantile_name', 'municipality_id');
+            }]);
     }
     public function excel(): BinaryFileResponse
     {
@@ -116,8 +120,10 @@ class Table extends DataTableComponent
                 ->options($this->departments)
                 ->setFirstOption('Todos')
                 ->filter(function (Builder $builder, $departments) {
-                    $builder->whereHas('company.municipality', function ($municipality) use ($departments) {
-                        $municipality->whereIn('province_id', $departments);
+                    $builder->whereHas('company', function ($companyQuery) use ($departments) {
+                        $companyQuery->whereHas('municipality', function ($municipalityQuery) use ($departments) {
+                            $municipalityQuery->whereIn('municipalities.province_id', $departments);
+                        });
                     });
                 })
         ];
@@ -126,7 +132,7 @@ class Table extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Número', 'pays.id')
+            Column::make('Número', 'id')
                 ->sortable(),
             Column::make('Empresa', 'company.mercantile_name')
                 ->sortable()
@@ -198,7 +204,7 @@ class Table extends DataTableComponent
                 ->html()
                 ->sortable()
                 ->searchable(),
-            Column::make('Acciones', "pays.id")
+            Column::make('Acciones', "id")
                 ->format(function ($pay_id, $row) {
                     $status = $row->status;
                     return view('components.admin-pay-actions', compact('pay_id', 'status', 'row'));

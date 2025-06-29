@@ -60,12 +60,15 @@ class Table extends DataTableComponent
         
         // If no companies are assigned, return empty query
         if (empty($assignedCompanyIds)) {
-            return Pay::where('id', 0); // This will return no results
+            return Pay::where('pays.id', 0); // This will return no results
         }
         
-        return Pay::select('pays.*')
-            ->with('company')
-            ->whereIn('company_id', $assignedCompanyIds);
+        return Pay::query()
+            ->select('pays.*')
+            ->with(['company' => function($query) {
+                $query->select('pays.id', 'mercantile_name');
+            }])
+            ->whereIn('pays.company_id', $assignedCompanyIds);
     }
     public function excel(): BinaryFileResponse
     {
@@ -119,7 +122,7 @@ class Table extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Número', 'pays.id')
+            Column::make('Número', 'id')
                 ->sortable()
                 ->searchable(),
             Column::make('Empresa', 'company.mercantile_name')
