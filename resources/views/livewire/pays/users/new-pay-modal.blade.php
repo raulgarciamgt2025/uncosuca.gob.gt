@@ -49,8 +49,13 @@
                             wire:model="usuarios"
                             min="0"
                             placeholder="Número de usuarios"
+                            readonly
                         >
                         </x-inputs.number>
+                        <div class="form-text">
+                            <i class="fa-solid fa-info-circle"></i>
+                            Campo solo de lectura
+                        </div>
                     </x-inputs.group>
                 @endif
                 
@@ -80,7 +85,7 @@
                     
                     <x-inputs.group class="col-lg-6">
                         <x-inputs.text
-                            label="TOTAL"
+                            label="MONTO"
                             name="total"
                             wire:model="total"
                             type="number"

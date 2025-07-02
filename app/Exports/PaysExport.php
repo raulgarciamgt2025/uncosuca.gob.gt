@@ -22,16 +22,21 @@ class PaysExport  implements FromView, ShouldAutoSize
             'Número',
             'Empresa',
             'Estado',
+            'Tipo',
             'Año',
             'Mes',
-            'Monto',
-            'Boleta'
+            'Usuarios',
+            'Total',
+            'Fecha Pago',
+            'No. Formulario',
+            'Observaciones',
+            'Fecha Transacción'
         ];
         return view('exports.pays', [
             'pays' => Pay::find($this->pays),
             'headers' => $headers,
             'mounts' => $this->mounts,
-            'statuses' => ['PENDIENTE', 'EN REVISIÓN', 'PAGADO', 'RECHAZADO']
+            'statuses' => ['PENDIENTE', 'EN REVISIÓN', 'APROBADO', 'RECHAZADO']
         ]);
     }
 }

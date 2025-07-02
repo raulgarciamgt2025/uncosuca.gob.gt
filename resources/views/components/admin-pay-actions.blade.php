@@ -9,6 +9,14 @@
         <i class="fa-solid fa-eye"></i>
     </button>
 
+    <!-- Edit Charges Button -->
+    <button
+        class="btn btn-sm btn-warning"
+        wire:click="$emit('openModal', 'pays.admin.edit-charges-modal', {{ json_encode(['payId' => $pay_id ])  }})"
+        title="Editar cargos">
+        <i class="fa-solid fa-edit"></i>
+    </button>
+
     <!-- Approve Button (only show if not already approved) -->
     @if($status != 2)
         <button

@@ -58,6 +58,21 @@
                 <p class="form-control-plaintext">{{ $months[$pay->mount] ?? $pay->mount }}</p>
             </div>
             
+            <!-- Penalty and Variable -->
+            <div class="col-md-3 mb-3">
+                <label class="form-label"><strong>Multa:</strong></label>
+                <p class="form-control-plaintext">
+                    <span class="text-danger">Q {{ number_format($pay->penalty ?? 0, 2) }}</span>
+                </p>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <label class="form-label"><strong>Recargo:</strong></label>
+                <p class="form-control-plaintext">
+                    <span class="text-warning">Q {{ number_format($pay->variable ?? 0, 2) }}</span>
+                </p>
+            </div>
+            
             <!-- Users and Amount -->
             <div class="col-md-6 mb-3">
                 <label class="form-label"><strong>Número de Usuarios:</strong></label>
@@ -106,6 +121,19 @@
                 <label class="form-label"><strong>Observaciones:</strong></label>
                 <div class="form-control-plaintext">
                     {{ $pay->observaciones ?: 'Sin observaciones' }}
+                </div>
+            </div>
+            
+            <!-- Transaction Date -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label"><strong>Fecha de Transacción:</strong></label>
+                <div class="form-control-plaintext">
+                    @if($pay->fecha_transaccion)
+                        {{ $pay->fecha_transaccion->format('d/m/Y H:i') }}
+                        <small class="text-muted">(Fecha de aprobación/rechazo)</small>
+                    @else
+                        <span class="text-muted">Pendiente de procesar</span>
+                    @endif
                 </div>
             </div>
             

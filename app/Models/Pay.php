@@ -29,6 +29,7 @@ class Pay extends Model
         'estado',
         'fecha_pago',
         'observaciones',
+        'fecha_transaccion',
     ];
 
     protected $attributes = [
@@ -40,8 +41,22 @@ class Pay extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'fecha_pago' => 'date',
+        'fecha_transaccion' => 'datetime',
+        'penalty' => 'float',
+        'variable' => 'float',
+        'amount' => 'float',
         'rejections' => 'json'
     ];
+
+    public function getUsuariosAttribute()
+    {
+        return $this->pay;
+    }
+
+    public function setUsuariosAttribute($value)
+    {
+        $this->pay = $value;
+    }
 
     public function company(): BelongsTo
     {

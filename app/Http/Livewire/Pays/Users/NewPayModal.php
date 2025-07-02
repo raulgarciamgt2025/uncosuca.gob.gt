@@ -55,6 +55,35 @@ class NewPayModal extends ModalComponent
         // If user has only one company, auto-select it
         if (count($this->companies) === 1) {
             $this->company_id = array_key_first($this->companies);
+            $this->loadUsuariosForCompany();
+        }
+    }
+
+    public function updatedCompanyId(): void
+    {
+        $this->loadUsuariosForCompany();
+    }
+
+    private function loadUsuariosForCompany(): void
+    {
+        if (!$this->company_id) {
+            $this->usuarios = 0;
+            return;
+        }
+
+        // Check for the last payment with status=2 (APROBADO) for this company
+        $lastApprovedPay = Pay::where('company_id', $this->company_id)
+            ->where('status', 2)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($lastApprovedPay) {
+            // Use the usuarios from the last approved payment
+            $this->usuarios = (int)($lastApprovedPay->pay ?? 0);
+        } else {
+            // No approved payments found, get default from company users_number
+            $company = Company::find($this->company_id);
+            $this->usuarios = (int)($company->users_number ?? 0);
         }
     }
 
@@ -65,7 +94,7 @@ class NewPayModal extends ModalComponent
             'month' => ['required', 'integer', 'between:1,12'],
             'year' => ['required', 'integer', 'min:2023', 'max:' . (date('Y') + 1)],
             'estado' => ['required', 'in:CUOTA,INSCRIPCION'],
-            'usuarios' => ['required', 'integer', 'min:0'],
+            'usuarios' => ['nullable', 'integer', 'min:0'],
             'total' => ['required', 'numeric', 'min:0'],
             'fecha_pago' => ['required', 'date'],
             'numero_formulario' => ['required', 'string', 'max:255'],
@@ -106,14 +135,14 @@ class NewPayModal extends ModalComponent
             'mount' => sprintf('%02d', $this->month),
             'year' => $this->year,
             'status' => 0, // Pending status
-            'pay' => $this->usuarios,
+            'pay' => $this->usuarios ?: 0,
             'amount' => $this->total,
             'variable' => 0,
             'penalty' => 0,
             'ticket_number' => $this->numero_formulario,
             'ticket_file' => $ticketFilePath,
             'rejections' => null,
-            'subscribers_number' => $this->usuarios,
+            'subscribers_number' => $this->usuarios ?: 0,
             'estado' => $this->estado,
             'fecha_pago' => $this->fecha_pago,
             'observaciones' => $this->observaciones,

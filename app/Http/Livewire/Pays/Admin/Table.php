@@ -160,14 +160,33 @@ class Table extends DataTableComponent
                     return $this->mounts[$mount] ?? '-';
                 })
                 ->sortable(),
+            Column::make('Multa', 'penalty')
+                ->format(function ($penalty) {
+                    return $penalty ? 'Q ' . number_format($penalty, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Recargo', 'variable')
+                ->format(function ($variable) {
+                    return $variable ? 'Q ' . number_format($variable, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Monto', 'amount')
+                ->format(function ($amount) {
+                    return $amount ? 'Q ' . number_format($amount, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Total', 'id')
+                ->format(function ($value, $row) {
+                    $penalty = (float)($row->penalty ?? 0);
+                    $variable = (float)($row->variable ?? 0);
+                    $amount = (float)($row->amount ?? 0);
+                    $total = $penalty + $variable + $amount;
+                    return '<strong>Q ' . number_format($total, 2) . '</strong>';
+                })
+                ->html(),
             Column::make('Usuarios', 'pay')
                 ->format(function ($pay) {
                     return $pay ? number_format($pay) : '0';
-                })
-                ->sortable(),
-            Column::make('Total', 'amount')
-                ->format(function ($amount) {
-                    return $amount ? 'Q ' . number_format($amount, 2) : 'Q 0.00';
                 })
                 ->sortable(),
             Column::make('Fecha Pago', 'fecha_pago')
@@ -204,6 +223,11 @@ class Table extends DataTableComponent
                 ->html()
                 ->sortable()
                 ->searchable(),
+            Column::make('Fecha Transacción', 'fecha_transaccion')
+                ->format(function ($fecha_transaccion) {
+                    return $fecha_transaccion ? date('d/m/Y H:i', strtotime($fecha_transaccion)) : '-';
+                })
+                ->sortable(),
             Column::make('Acciones', "id")
                 ->format(function ($pay_id, $row) {
                     $status = $row->status;
@@ -214,19 +238,22 @@ class Table extends DataTableComponent
 
     public function refreshTable(): void
     {
-        $this->emit('refreshDatatable');
+        // This will trigger a re-render of the component
     }
 
     public function changePayStatus($payId, $newStatus): void
     {
         try {
             $pay = Pay::findOrFail($payId);
-            $pay->update(['status' => $newStatus]);
+            $pay->update([
+                'status' => $newStatus,
+                'fecha_transaccion' => now()
+            ]);
             
             $statusText = $newStatus == 2 ? 'aprobado' : 'rechazado';
             $this->alert('success', "Pago {$statusText} exitosamente");
             
-            $this->emit('refreshDatatable');
+            $this->emit('refreshTable');
         } catch (\Exception $e) {
             $this->alert('error', 'Error al actualizar el estado del pago');
         }

@@ -148,14 +148,33 @@ class Table extends DataTableComponent
                     return $this->mounts[$mount] ?? '-';
                 })
                 ->sortable(),
+            Column::make('Multa', 'penalty')
+                ->format(function ($penalty) {
+                    return $penalty ? 'Q ' . number_format($penalty, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Recargo', 'variable')
+                ->format(function ($variable) {
+                    return $variable ? 'Q ' . number_format($variable, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Monto', 'amount')
+                ->format(function ($amount) {
+                    return $amount ? 'Q ' . number_format($amount, 2) : 'Q 0.00';
+                })
+                ->sortable(),
+            Column::make('Total', 'id')
+                ->format(function ($value, $row) {
+                    $penalty = (float)($row->penalty ?? 0);
+                    $variable = (float)($row->variable ?? 0);
+                    $amount = (float)($row->amount ?? 0);
+                    $total = $penalty + $variable + $amount;
+                    return '<strong>Q ' . number_format($total, 2) . '</strong>';
+                })
+                ->html(),
             Column::make('Usuarios', 'pay')
                 ->format(function ($pay) {
                     return $pay ? number_format($pay) : '0';
-                })
-                ->sortable(),
-            Column::make('Total', 'amount')
-                ->format(function ($amount) {
-                    return $amount ? 'Q ' . number_format($amount, 2) : 'Q 0.00';
                 })
                 ->sortable(),
             Column::make('Fecha Pago', 'fecha_pago')
