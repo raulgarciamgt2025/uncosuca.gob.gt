@@ -23,7 +23,7 @@ class EditChargesModal extends ModalComponent
         $this->pay = Pay::with('company')->findOrFail($payId);
         $this->penalty = (float)($this->pay->penalty ?? 0);
         $this->variable = (float)($this->pay->variable ?? 0);
-        $this->usuarios = (int)($this->pay->usuarios ?? 0);
+        $this->usuarios = (int)($this->pay->pay ?? 0);
     }
 
     protected $rules = [
@@ -47,13 +47,20 @@ class EditChargesModal extends ModalComponent
         $this->validate();
 
         try {
+            // Update the payment record
             $this->pay->update([
                 'penalty' => (float)($this->penalty ?: 0),
                 'variable' => (float)($this->variable ?: 0),
                 'pay' => (int)($this->usuarios ?: 0),
+                'subscribers_number' => (int)($this->usuarios ?: 0),
             ]);
 
-            $this->alert('success', 'Cargos actualizados exitosamente');
+            // Also update the company's users_number field
+            $company = $this->pay->company;
+            $company->users_number = (int)($this->usuarios ?: 0);
+            $company->save();
+
+            $this->alert('success', 'Cargos y usuarios actualizados exitosamente');
             
             // Emit event to refresh the admin table
             $this->emit('refreshTable');
@@ -64,7 +71,8 @@ class EditChargesModal extends ModalComponent
             $this->dispatchBrowserEvent('refresh-page', ['delay' => 1500]);
             
         } catch (\Exception $e) {
-            $this->alert('error', 'Error al actualizar los cargos');
+            \Log::error('Error updating charges: ' . $e->getMessage());
+            $this->alert('error', 'Error al actualizar los cargos: ' . $e->getMessage());
         }
     }
 
